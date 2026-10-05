@@ -10,6 +10,9 @@ function entry(police: string, id: string): RelanceEntry {
     statut: 'En retard',
     sentOn: '2026-01-01',
     note: '',
+    source: 'modele',
+    message: '',
+    proof: null,
     templateId: null,
     createdAt: '2026-01-01T00:00:00.000Z',
   };

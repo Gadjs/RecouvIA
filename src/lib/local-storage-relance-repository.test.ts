@@ -11,6 +11,9 @@ const NEW_ENTRY: NewRelanceEntry = {
   statut: 'En retard',
   sentOn: '2026-01-10',
   note: 'Test',
+  source: 'modele',
+  message: '',
+  proof: null,
   templateId: 'tpl-11',
 };
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { normalizePolice } from '../../domain/police';
 import type { RelanceEntry } from '../../domain/types';
 import { formatDate } from '../../lib/dates';
+import { formatAmount } from '../../lib/format';
 import { fr } from '../../i18n/fr';
 
 interface RelanceListProps {
@@ -44,6 +45,7 @@ export function RelanceList({ entries, onDuplicate, onRemove }: RelanceListProps
                 <th scope="col">{t.columns.step}</th>
                 <th scope="col">{t.columns.canal}</th>
                 <th scope="col">{t.columns.statut}</th>
+                <th scope="col">{t.columns.source}</th>
                 <th scope="col">{t.columns.note}</th>
                 <th scope="col">{t.columns.actions}</th>
               </tr>
@@ -56,7 +58,27 @@ export function RelanceList({ entries, onDuplicate, onRemove }: RelanceListProps
                   <td>{entry.step}</td>
                   <td>{entry.canal}</td>
                   <td>{entry.statut}</td>
-                  <td>{entry.note}</td>
+                  <td>{t.sources[entry.source]}</td>
+                  <td>
+                    {entry.note}
+                    {entry.proof && (
+                      <p className="muted">
+                        {t.proofSummary(
+                          entry.proof.operator,
+                          entry.proof.amount === null
+                            ? ''
+                            : formatAmount(entry.proof.amount, entry.proof.currency),
+                          entry.proof.transactionReference ?? '',
+                        )}
+                      </p>
+                    )}
+                    {entry.message && (
+                      <details>
+                        <summary>{t.showMessage}</summary>
+                        {entry.message}
+                      </details>
+                    )}
+                  </td>
                   <td className="actions">
                     <button
                       type="button"

@@ -44,3 +44,7 @@ pnpm-debug.log*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Firebase emulator secrets
+functions/.secret.local
+functions/.secret.*

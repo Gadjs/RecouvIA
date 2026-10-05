@@ -25,6 +25,9 @@ a server-side function (never directly from the browser).
 - `npm run build` — type-check (`tsc --noEmit`) then production build
 - `npm test` — run Vitest once (`npm run test:watch` for watch mode)
 - `npm run lint` — ESLint
+- `npm --prefix functions run build` — compile the Cloud Functions (`functions/`)
+- `firebase emulators:start --only functions --project demo-recouvia` — run the AI backend locally
+  (offline demo project; Gemini key goes in `functions/.secret.local`, never read or committed)
 
 Run `npm run lint && npm test && npm run build` before calling any work done.
 
@@ -45,11 +48,14 @@ src/
   data/                 # fictional seed data and fixtures only
   lib/                  # small helpers (dates, formatting, storage)
   i18n/                 # French UI strings
+functions/              # Firebase Cloud Functions (Gemini calls), holds all secrets
 api/                    # server-side functions (Phase 2), holds all secrets
 tests/                  # shared test utilities; unit tests sit next to the code
 ```
 Phase 1 status: `templates/` and `reminders/` are built; `situation/`, `proof-upload/`,
 `components/` and `api/` do not exist yet (create them when the feature lands).
+The AI backend lives in `functions/` (Firebase callable functions `analyzeSituation` and
+`readPaymentProof`, emulator only); the frontend does not call it yet.
 Persistence goes through `RelanceRepository` (`src/lib/relance-repository.ts`); features
 depend on that interface, never on `localStorage` directly. The step → canal/tone
 mapping lives in `src/domain/relance-steps.ts`; templates store only `step` + `statut`.

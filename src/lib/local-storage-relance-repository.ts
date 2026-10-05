@@ -1,9 +1,12 @@
 import {
   CANAUX,
+  ENTRY_SOURCES,
+  OPERATORS,
   RELANCE_STEP_IDS,
   STATUTS,
   isOneOf,
   type NewRelanceEntry,
+  type PaymentProof,
   type RelanceEntry,
 } from '../domain/types';
 import type { RelanceRepository } from './relance-repository';
@@ -14,9 +17,46 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+function nullableString(value: unknown): string | null | undefined {
+  if (value === null) return null;
+  return typeof value === 'string' ? value : undefined;
+}
+
+function parseProof(value: unknown): PaymentProof | null {
+  if (!isRecord(value)) return null;
+  const { operator, amount, currency, date, transactionReference, payerName } = value;
+  const parsed = {
+    currency: nullableString(currency),
+    date: nullableString(date),
+    transactionReference: nullableString(transactionReference),
+    payerName: nullableString(payerName),
+  };
+  if (
+    !isOneOf(OPERATORS, operator) ||
+    !(amount === null || (typeof amount === 'number' && Number.isInteger(amount))) ||
+    parsed.currency === undefined ||
+    parsed.date === undefined ||
+    parsed.transactionReference === undefined ||
+    parsed.payerName === undefined
+  ) {
+    return null;
+  }
+  return {
+    operator,
+    amount,
+    currency: parsed.currency,
+    date: parsed.date,
+    transactionReference: parsed.transactionReference,
+    payerName: parsed.payerName,
+  };
+}
+
 function parseEntry(value: unknown): RelanceEntry | null {
   if (!isRecord(value)) return null;
   const { id, police, step, canal, statut, sentOn, note, templateId, createdAt } = value;
+  // `source`, `message` and `proof` were added after the first release: default them.
+  const source = value.source ?? 'modele';
+  const message = value.message ?? '';
   if (
     typeof id !== 'string' ||
     typeof police !== 'string' ||
@@ -26,11 +66,26 @@ function parseEntry(value: unknown): RelanceEntry | null {
     typeof sentOn !== 'string' ||
     typeof note !== 'string' ||
     (templateId !== null && typeof templateId !== 'string') ||
-    typeof createdAt !== 'string'
+    typeof createdAt !== 'string' ||
+    !isOneOf(ENTRY_SOURCES, source) ||
+    typeof message !== 'string'
   ) {
     return null;
   }
-  return { id, police, step, canal, statut, sentOn, note, templateId, createdAt };
+  return {
+    id,
+    police,
+    step,
+    canal,
+    statut,
+    sentOn,
+    note,
+    source,
+    message,
+    proof: parseProof(value.proof),
+    templateId,
+    createdAt,
+  };
 }
 
 function readAll(storage: Storage): RelanceEntry[] {

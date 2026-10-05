@@ -3,11 +3,19 @@ import { Journal } from './features/reminders/Journal';
 import { TemplateLibrary } from './features/templates/TemplateLibrary';
 import type { ReminderTemplate } from './features/templates/templates-data';
 import { fr } from './i18n/fr';
+import type { AiService } from './lib/ai-service';
+import { createFirebaseAiService } from './lib/firebase-ai-service';
 import { createLocalStorageRelanceRepository } from './lib/local-storage-relance-repository';
 
-export function App() {
+interface AppProps {
+  /** Override the AI backend (tests); defaults to the Firebase callable functions. */
+  ai?: AiService;
+}
+
+export function App({ ai }: AppProps) {
   // Swap this one line for a database-backed implementation of RelanceRepository.
   const repository = useMemo(() => createLocalStorageRelanceRepository(), []);
+  const aiService = useMemo(() => ai ?? createFirebaseAiService(), [ai]);
   const [selection, setSelection] = useState<{
     template: ReminderTemplate;
     nonce: number;
@@ -30,7 +38,7 @@ export function App() {
       </header>
       <main>
         <div ref={journalRef}>
-          <Journal repository={repository} selection={selection} />
+          <Journal repository={repository} ai={aiService} selection={selection} />
         </div>
         <TemplateLibrary onUse={handleUse} />
       </main>

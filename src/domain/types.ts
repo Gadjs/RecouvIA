@@ -37,6 +37,28 @@ export function isOneOf<T extends string>(
   );
 }
 
+/** How an entry was created. */
+export const ENTRY_SOURCES = ['modele', 'description', 'preuve'] as const;
+export type EntrySource = (typeof ENTRY_SOURCES)[number];
+
+export const OPERATORS = ['Wave', 'Orange Money', 'inconnu'] as const;
+export type Operator = (typeof OPERATORS)[number];
+
+/**
+ * Fields read from a payment-proof screenshot. `null` = not visible on the image.
+ * The screenshot itself is never stored.
+ */
+export interface PaymentProof {
+  operator: Operator;
+  /** Integer amount (XOF), no decimals. */
+  amount: number | null;
+  currency: string | null;
+  /** ISO 8601 date (`YYYY-MM-DD`). */
+  date: string | null;
+  transactionReference: string | null;
+  payerName: string | null;
+}
+
 /** A logged reminder (ISO 8601 dates). */
 export interface RelanceEntry {
   id: string;
@@ -48,6 +70,11 @@ export interface RelanceEntry {
   /** Date the reminder was sent, `YYYY-MM-DD`. */
   sentOn: string;
   note: string;
+  source: EntrySource;
+  /** Message text (template or AI draft, possibly edited); may contain `{placeholders}`. */
+  message: string;
+  /** Present only for entries created from a payment proof. */
+  proof: PaymentProof | null;
   /** Library template this entry came from, if any. */
   templateId: string | null;
   /** Creation timestamp, ISO 8601. */

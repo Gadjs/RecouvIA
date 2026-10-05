@@ -14,6 +14,7 @@ a server-side function (never directly from the browser).
 - Vite + React + TypeScript (strict). Node 22 LTS.
 - Exact versions are pinned in `package.json`; treat it as the source of truth and
   update this section when a major version changes.
+- TypeScript stays on 6.0.x until `typescript-eslint` supports 7 (it requires `<6.1`).
 - Tests: Vitest + React Testing Library.
 - Lint/format: ESLint + Prettier (configs live at the repo root).
 - Server-side function (Phase 2): `api/` (serverless handler). Secrets exist only there.
@@ -47,6 +48,12 @@ src/
 api/                    # server-side functions (Phase 2), holds all secrets
 tests/                  # shared test utilities; unit tests sit next to the code
 ```
+Phase 1 status: `templates/` and `reminders/` are built; `situation/`, `proof-upload/`,
+`components/` and `api/` do not exist yet (create them when the feature lands).
+Persistence goes through `RelanceRepository` (`src/lib/relance-repository.ts`); features
+depend on that interface, never on `localStorage` directly. The step → canal/tone
+mapping lives in `src/domain/relance-steps.ts`; templates store only `step` + `statut`.
+
 If the real layout differs from this, fix the code or this section — do not leave
 them out of sync.
 

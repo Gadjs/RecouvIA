@@ -11,3 +11,8 @@ export function formatDate(iso: string): string {
   if (Number.isNaN(date.getTime())) return iso;
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(date);
 }
+
+/** Long display format for a date (`fr-FR`), e.g. "lundi 5 octobre 2026". */
+export function formatLongDate(date: Date): string {
+  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full' }).format(date);
+}

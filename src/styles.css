@@ -4,7 +4,8 @@
   --text: #1c2430;
   --muted: #5b6676;
   --border: #d9dee6;
-  --primary: #0b5c8a;
+  --primary: #2b2b5e;
+  --accent: #d5a00a;
   --primary-text: #ffffff;
   --danger: #b3261e;
   font-family:
@@ -24,8 +25,9 @@
     --text: #e8ecf1;
     --muted: #9aa5b4;
     --border: #2f3846;
-    --primary: #5bb0e0;
-    --primary-text: #0b1620;
+    --primary: #a9a9ec;
+    --accent: #e5b72e;
+    --primary-text: #12121f;
     --danger: #ff8a80;
   }
 }
@@ -40,22 +42,50 @@ body {
 }
 
 .app-header {
-  padding: 1.5rem 1rem 0.5rem;
+  background: #2b2b5e;
+  color: #ffffff;
+  border-bottom: 4px solid #d5a00a;
+  padding: 1rem 1rem 0.75rem;
+}
+
+.app-header-inner,
+.app-notice {
   max-width: 72rem;
   margin: 0 auto;
+}
+
+.app-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
 }
 
 .app-header h1 {
   margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.02em;
 }
 
 .app-header p {
-  margin: 0.25rem 0;
+  margin: 0.2rem 0 0;
+}
+
+.app-date {
+  color: #d5a00a;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.app-notice {
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 main {
   max-width: 72rem;
-  margin: 0 auto;
+  margin: 1.5rem auto 0;
   padding: 0 1rem 3rem;
   display: grid;
   gap: 2rem;
@@ -66,6 +96,7 @@ section {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1rem 1.25rem;
+  box-shadow: 0 1px 2px rgb(43 43 94 / 8%);
 }
 
 section section {
@@ -344,4 +375,170 @@ td {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 0.75rem;
+}
+
+/* Status colours: each pair keeps >= 4.5:1 contrast on its own background. */
+.statut-ok {
+  --st-bg: #e1f3e6;
+  --st-fg: #14532d;
+  --st-bar: #2e9d57;
+}
+.statut-soon {
+  --st-bg: #fdf1cc;
+  --st-fg: #6b4a00;
+  --st-bar: #d5a00a;
+}
+.statut-late {
+  --st-bg: #fde3e1;
+  --st-fg: #8a1c14;
+  --st-bar: #d33a2f;
+}
+.statut-promise {
+  --st-bg: #e0e4fb;
+  --st-fg: #2b2b5e;
+  --st-bar: #5a62c9;
+}
+.statut-escalade {
+  --st-bg: #ece0f6;
+  --st-fg: #4a1d6e;
+  --st-bar: #8a3fc0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .statut-ok {
+    --st-bg: #17321f;
+    --st-fg: #9be3b4;
+  }
+  .statut-soon {
+    --st-bg: #3a2f0a;
+    --st-fg: #f2d675;
+  }
+  .statut-late {
+    --st-bg: #3d1a17;
+    --st-fg: #ffb4ab;
+  }
+  .statut-promise {
+    --st-bg: #23264a;
+    --st-fg: #c3c8ff;
+  }
+  .statut-escalade {
+    --st-bg: #31173f;
+    --st-fg: #e3c0ff;
+  }
+}
+
+.badge.statut-ok,
+.badge.statut-soon,
+.badge.statut-late,
+.badge.statut-promise,
+.badge.statut-escalade {
+  background: var(--st-bg);
+  color: var(--st-fg);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 1rem;
+}
+
+button.chip {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+button.chip[aria-pressed='true'] {
+  background: var(--st-bg, var(--primary));
+  color: var(--st-fg, var(--primary-text));
+  border-color: var(--st-bar, var(--primary));
+  font-weight: 700;
+}
+
+.chip-count {
+  opacity: 0.75;
+  margin-left: 0.2rem;
+}
+
+.entries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--st-bar);
+  border-radius: 8px;
+}
+
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.entry-note {
+  margin: 0;
+}
+
+.entry .actions {
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+.empty-state {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+.counters li {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.entry-tabs .tab.active {
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.meta div {
+  min-width: 5rem;
+}
+
+@media (max-width: 480px) {
+  section {
+    padding: 0.85rem;
+  }
+  .app-header h1 {
+    font-size: 1.35rem;
+  }
 }

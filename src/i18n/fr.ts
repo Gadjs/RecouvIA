@@ -2,6 +2,7 @@ export const fr = {
   app: {
     title: 'RecouvIA',
     subtitle: 'Préparez et consignez vos relances de primes — NSIA Vie Assurances',
+    today: (date: string) => `Aujourd’hui : ${date}`,
     demoNotice:
       'Données fictives uniquement. Les entrées sont enregistrées dans ce navigateur.',
   },
@@ -104,6 +105,7 @@ export const fr = {
       'too-large':
         'L’image reste trop volumineuse (4 Mo maximum). Essayez une capture plus petite.',
     },
+    loading: 'Chargement des relances…',
     counters: {
       title: 'Relances par police',
       empty: 'Aucune police pour le moment.',
@@ -112,7 +114,10 @@ export const fr = {
     list: {
       title: 'Relances enregistrées',
       empty: 'Aucune relance enregistrée. Utilisez le formulaire ci-dessus.',
+      emptyFiltered: 'Aucune relance ne correspond à ces filtres.',
       filterLabel: 'Filtrer par numéro de police',
+      statusFilterLabel: 'Filtrer par statut',
+      allStatuts: 'Tous',
       duplicate: 'Dupliquer',
       duplicateAria: (police: string, step: string) =>
         `Dupliquer la relance ${step} de la police ${police}`,

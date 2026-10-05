@@ -5,6 +5,7 @@ import type { ReminderTemplate } from './features/templates/templates-data';
 import { fr } from './i18n/fr';
 import type { AiService } from './lib/ai-service';
 import { createFirebaseAiService } from './lib/firebase-ai-service';
+import { formatLongDate } from './lib/dates';
 import { createLocalStorageRelanceRepository } from './lib/local-storage-relance-repository';
 
 interface AppProps {
@@ -32,9 +33,14 @@ export function App({ ai }: AppProps) {
   return (
     <>
       <header className="app-header">
-        <h1>{fr.app.title}</h1>
-        <p>{fr.app.subtitle}</p>
-        <p className="muted">{fr.app.demoNotice}</p>
+        <div className="app-header-inner">
+          <div>
+            <h1>{fr.app.title}</h1>
+            <p>{fr.app.subtitle}</p>
+          </div>
+          <p className="app-date">{fr.app.today(formatLongDate(new Date()))}</p>
+        </div>
+        <p className="app-notice">{fr.app.demoNotice}</p>
       </header>
       <main>
         <div ref={journalRef}>

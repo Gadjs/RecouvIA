@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { normalizePolice } from '../../domain/police';
-import type { RelanceEntry } from '../../domain/types';
+import { STATUTS, type RelanceEntry, type Statut } from '../../domain/types';
 import { formatDate } from '../../lib/dates';
 import { formatAmount } from '../../lib/format';
 import { fr } from '../../i18n/fr';
+
+const STATUT_CLASS: Record<Statut, string> = {
+  'À jour': 'statut-ok',
+  'Échéance proche': 'statut-soon',
+  'En retard': 'statut-late',
+  'Promesse de paiement': 'statut-promise',
+  'Escalade conseiller': 'statut-escalade',
+};
 
 interface RelanceListProps {
   entries: readonly RelanceEntry[];
@@ -13,13 +21,16 @@ interface RelanceListProps {
 
 export function RelanceList({ entries, onDuplicate, onRemove }: RelanceListProps) {
   const [filter, setFilter] = useState('');
+  const [statutFilter, setStatutFilter] = useState<Statut | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const t = fr.journal.list;
 
   const normalizedFilter = normalizePolice(filter);
-  const visible = normalizedFilter
-    ? entries.filter((e) => e.police.includes(normalizedFilter))
-    : entries;
+  const visible = entries.filter(
+    (e) =>
+      (!normalizedFilter || e.police.includes(normalizedFilter)) &&
+      (statutFilter === null || e.statut === statutFilter),
+  );
 
   return (
     <section aria-labelledby="list-title">
@@ -33,97 +44,122 @@ export function RelanceList({ entries, onDuplicate, onRemove }: RelanceListProps
         />
       </label>
 
+      <div className="chips" role="group" aria-label={t.statusFilterLabel}>
+        <button
+          type="button"
+          className="chip"
+          aria-pressed={statutFilter === null}
+          onClick={() => setStatutFilter(null)}
+        >
+          {t.allStatuts} <span className="chip-count">{entries.length}</span>
+        </button>
+        {STATUTS.map((statut) => (
+          <button
+            key={statut}
+            type="button"
+            className={`chip ${STATUT_CLASS[statut]}`}
+            aria-pressed={statutFilter === statut}
+            onClick={() => setStatutFilter(statutFilter === statut ? null : statut)}
+          >
+            {statut}{' '}
+            <span className="chip-count">
+              {entries.filter((e) => e.statut === statut).length}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {visible.length === 0 ? (
-        <p className="muted">{t.empty}</p>
+        <p className="empty-state">{entries.length === 0 ? t.empty : t.emptyFiltered}</p>
       ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">{t.columns.sentOn}</th>
-                <th scope="col">{t.columns.police}</th>
-                <th scope="col">{t.columns.step}</th>
-                <th scope="col">{t.columns.canal}</th>
-                <th scope="col">{t.columns.statut}</th>
-                <th scope="col">{t.columns.source}</th>
-                <th scope="col">{t.columns.note}</th>
-                <th scope="col">{t.columns.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{formatDate(entry.sentOn)}</td>
-                  <td>{entry.police}</td>
-                  <td>{entry.step}</td>
-                  <td>{entry.canal}</td>
-                  <td>{entry.statut}</td>
-                  <td>{t.sources[entry.source]}</td>
-                  <td>
-                    {entry.note}
-                    {entry.proof && (
-                      <p className="muted">
-                        {t.proofSummary(
-                          entry.proof.operator,
-                          entry.proof.amount === null
-                            ? ''
-                            : formatAmount(entry.proof.amount, entry.proof.currency),
-                          entry.proof.transactionReference ?? '',
-                        )}
-                      </p>
-                    )}
-                    {entry.message && (
-                      <details>
-                        <summary>{t.showMessage}</summary>
-                        {entry.message}
-                      </details>
-                    )}
-                  </td>
-                  <td className="actions">
+        <ul className="entries" aria-label={t.title}>
+          {visible.map((entry) => (
+            <li key={entry.id} className={`entry ${STATUT_CLASS[entry.statut]}`}>
+              <div className="entry-head">
+                <strong className="entry-police">{entry.police}</strong>
+                <span className={`badge ${STATUT_CLASS[entry.statut]}`}>
+                  {entry.statut}
+                </span>
+              </div>
+              <dl className="meta">
+                <div>
+                  <dt>{t.columns.sentOn}</dt>
+                  <dd>{formatDate(entry.sentOn)}</dd>
+                </div>
+                <div>
+                  <dt>{t.columns.step}</dt>
+                  <dd>{entry.step}</dd>
+                </div>
+                <div>
+                  <dt>{t.columns.canal}</dt>
+                  <dd>{entry.canal}</dd>
+                </div>
+                <div>
+                  <dt>{t.columns.source}</dt>
+                  <dd>{t.sources[entry.source]}</dd>
+                </div>
+              </dl>
+              {entry.note && <p className="entry-note">{entry.note}</p>}
+              {entry.proof && (
+                <p className="muted">
+                  {t.proofSummary(
+                    entry.proof.operator,
+                    entry.proof.amount === null
+                      ? ''
+                      : formatAmount(entry.proof.amount, entry.proof.currency),
+                    entry.proof.transactionReference ?? '',
+                  )}
+                </p>
+              )}
+              {entry.message && (
+                <details>
+                  <summary>{t.showMessage}</summary>
+                  {entry.message}
+                </details>
+              )}
+              <div className="actions">
+                <button
+                  type="button"
+                  className="secondary"
+                  aria-label={t.duplicateAria(entry.police, entry.step)}
+                  onClick={() => void onDuplicate(entry.id)}
+                >
+                  {t.duplicate}
+                </button>
+                {pendingDeleteId === entry.id ? (
+                  <>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => {
+                        setPendingDeleteId(null);
+                        void onRemove(entry.id);
+                      }}
+                    >
+                      {t.confirm}
+                    </button>
                     <button
                       type="button"
                       className="secondary"
-                      aria-label={t.duplicateAria(entry.police, entry.step)}
-                      onClick={() => void onDuplicate(entry.id)}
+                      onClick={() => setPendingDeleteId(null)}
                     >
-                      {t.duplicate}
+                      {t.cancel}
                     </button>
-                    {pendingDeleteId === entry.id ? (
-                      <>
-                        <button
-                          type="button"
-                          className="danger"
-                          onClick={() => {
-                            setPendingDeleteId(null);
-                            void onRemove(entry.id);
-                          }}
-                        >
-                          {t.confirm}
-                        </button>
-                        <button
-                          type="button"
-                          className="secondary"
-                          onClick={() => setPendingDeleteId(null)}
-                        >
-                          {t.cancel}
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="secondary"
-                        aria-label={t.removeAria(entry.police, entry.step)}
-                        onClick={() => setPendingDeleteId(entry.id)}
-                      >
-                        {t.remove}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="secondary"
+                    aria-label={t.removeAria(entry.police, entry.step)}
+                    onClick={() => setPendingDeleteId(entry.id)}
+                  >
+                    {t.remove}
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );

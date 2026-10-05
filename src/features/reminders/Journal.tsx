@@ -47,6 +47,11 @@ export function Journal({ repository, ai, selection }: JournalProps) {
           preuve: <ProofUploadPanel ai={ai} onSubmit={add} />,
         }}
       />
+      {!loaded && (
+        <p className="spinner-row" role="status">
+          <span className="spinner" aria-hidden="true" /> {fr.journal.loading}
+        </p>
+      )}
       {loaded && (
         <>
           <PoliceCounters entries={entries} />

@@ -69,7 +69,7 @@ describe('"Décrire" flow', () => {
       within(panel).getByRole('button', { name: /enregistrer la relance/i }),
     );
 
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('list', { name: /relances enregistrées/i });
     expect(table).toHaveTextContent('DEMO-0003');
     expect(table).toHaveTextContent('Description (IA)');
     expect(table).toHaveTextContent('Message corrigé');
@@ -141,7 +141,7 @@ describe('"Preuve de paiement" flow', () => {
       within(panel).getByRole('button', { name: /enregistrer la relance/i }),
     );
 
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('list', { name: /relances enregistrées/i });
     expect(table).toHaveTextContent('Preuve de paiement');
     expect(table).toHaveTextContent('Preuve Wave');
     expect(table).toHaveTextContent('TEST-WAVE-1');
@@ -172,6 +172,8 @@ describe('"Preuve de paiement" flow', () => {
     expect(await within(panel).findByRole('alert')).toHaveTextContent(
       /montant invalide/i,
     );
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('list', { name: /relances enregistrées/i }),
+    ).not.toBeInTheDocument();
   });
 });
